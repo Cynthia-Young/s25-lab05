@@ -1,5 +1,7 @@
 package frogger;
 
+import javax.xml.catalog.CatalogFeatures.Feature;
+
 /**
  * Refactor Task 1 & 2: Frogger
  *
@@ -13,19 +15,18 @@ public class Frogger {
     
     // Field for task 2. Anything to add/change?
     private final Records records;
-    private String firstName, lastName, phoneNumber, zipCode, state, gender;
 
-    public Frogger(Road road, int position, Records records, String firstName, String lastName, String phoneNumber,
-    String zipCode, String state, String gender) {
+    // God Class
+    // Explanation: Frogger class contains a lot of ID information fields
+    // Solution: Moved identity-related fields into FroggerID record class
+    // private String firstName, lastName, phoneNumber, zipCode, state, gender;
+    private final FroggerID id;
+
+    public Frogger(Road road, int position, Records records, FroggerID id) {
         this.road = road;
         this.position = position;
         this.records = records;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.zipCode = zipCode;
-        this.state = state;
-        this.gender = gender;
+        this.id = id;
     }
 
     /**
@@ -36,24 +37,32 @@ public class Frogger {
      */
     public boolean move(boolean forward) {
         int nextPosition = this.position + (forward ? 1 : -1);
-        if (!isValid(nextPosition) || isOccupied(nextPosition)) {
-            return false;
+        if (road.canMoveTo(nextPosition)) {
+            this.position = nextPosition;
+            return true;
         }
-        this.position = nextPosition;
-        return true;
+        return false;
     }
 
     // TODO: Do you notice any issues here?
-    public boolean isOccupied(int position) {
-        boolean[] occupied = this.road.getOccupied();
-        return occupied[position];
-    }
+    // Feature Envy (Anti-pattern) / violate information expert pattern, low coupling, high cohesion
+    // Explanation: Frogger class was too interested in Road's internal data. Frogger does not need to know
+    //     - the state of the entire road
+    //     - how to determin whether the location is occupied
+    //     - how to verify whether the location is valid
+    // Solution: Moved the responsibility back to the Road class where it belongs
+
+
+    // public boolean isOccupied(int position) {
+    //     boolean[] occupied = this.road.getOccupied();
+    //     return occupied[position];
+    // }
     
-    public boolean isValid(int position) {
-        if (position < 0) return false;
-        boolean[] occupied = this.road.getOccupied();
-        return position < occupied.length;
-    }
+    // public boolean isValid(int position) {
+    //     if (position < 0) return false;
+    //     boolean[] occupied = this.road.getOccupied();
+    //     return position < occupied.length;
+    // }
 
     /**
      * Records Frogger to the list of records.
@@ -61,7 +70,7 @@ public class Frogger {
      * @return true if record successful, else false.
      */
     public boolean recordMyself() {
-      boolean success = records.addRecord(firstName, lastName, phoneNumber, zipCode, state, gender);
+      boolean success = records.addRecord(id);
       return success;
     }
 

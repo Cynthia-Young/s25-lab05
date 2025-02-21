@@ -30,10 +30,16 @@ public class Drawing {
      */
     public void draw(String format, String filename) {
         // TODO: Do you notice any issues here?
+        // 1. Code Duplication (Anti-pattern)
+        // Problem: The draw method duplicates code for different file formats
+        // Solution: Create another class which can help createWriter depends on format
+
         if (format.equals("jpeg")) {
             try (Writer writer = new JPEGWriter(filename + ".jpeg")) {
                 for (Shape shape : this.shapes) {
                     // TODO: What is the issue of the behavior here?
+                    // Solution: make toLines() method privately, add this process into draw()
+                    // make shape to lines conversion internally
                     Line[] lines = shape.toLines();
                     shape.draw(writer, lines);
                 }
@@ -53,3 +59,5 @@ public class Drawing {
     }
 }
 
+2. Poor Encapsulation 
+Solution: Move the line conversion into Shape class
